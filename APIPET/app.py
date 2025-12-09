@@ -1,16 +1,16 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from datetime import datetime
 import os
 import json
 import uuid
 
 app = Flask(__name__)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
-# Caminho relativo para a pasta jsons (um nível acima)
-PASTA_JSONS = os.path.join(os.path.dirname(os.path.dirname(__file__)), "jsons")
-
-# Garantir que a pasta jsons existe
-os.makedirs(PASTA_JSONS, exist_ok=True)
+# No Vercel, não podemos salvar arquivos localmente
+# Vamos usar uma variável de ambiente para configurar webhook ou retornar dados processados
+WEBHOOK_URL = os.environ.get('WEBHOOK_URL', None)
 
 
 @app.route('/', methods=['GET'])
@@ -19,15 +19,16 @@ def home():
     return jsonify({
         "mensagem": "API PET Saúde Digital",
         "status": "online",
-        "endpoint": "/receber-json",
-        "metodo": "POST"
+        "endpoint": "/api/receber-json",
+        "metodo": "POST",
+        "plataforma": "Vercel"
     }), 200
 
 
-@app.route('/receber-json', methods=['POST'])
+@app.route('/api/receber-json', methods=['POST', 'OPTIONS'])
 def receber_json():
     """
-    Endpoint que recebe JSON e salva na pasta jsons
+    Endpoint que recebe JSON e processa dados de pacientes
     
     Aceita:
     - JSON no body da requisição
@@ -37,6 +38,10 @@ def receber_json():
     - Status 200 se sucesso
     - Status 400 se erro
     """
+    # Tratar OPTIONS (preflight CORS)
+    if request.method == 'OPTIONS':
+        return '', 200
+    
     try:
         # Verificar se há dados JSON no request
         if not request.is_json:
@@ -62,26 +67,46 @@ def receber_json():
         if isinstance(dados, dict):
             dados = [dados]
         
+        # Validar campos obrigatórios
+        for paciente in dados:
+            if not isinstance(paciente, dict):
+                return jsonify({
+                    "erro": "Cada item do array deve ser um objeto"
+                }), 400
+            if "nome" not in paciente or "cpf" not in paciente:
+                return jsonify({
+                    "erro": "Campos 'nome' e 'cpf' são obrigatórios"
+                }), 400
+        
         # Gerar nome único para o arquivo
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         id_unico = str(uuid.uuid4())[:8]
         nome_arquivo = f"entrada_{timestamp}_{id_unico}.json"
-        caminho_arquivo = os.path.join(PASTA_JSONS, nome_arquivo)
-        
-        # Salvar JSON no arquivo
-        with open(caminho_arquivo, 'w', encoding='utf-8') as f:
-            json.dump(dados, f, ensure_ascii=False, indent=2)
-        
-        # Contar quantos pacientes foram recebidos
         num_pacientes = len(dados)
         
-        return jsonify({
-            "mensagem": "JSON recebido e salvo com sucesso",
-            "arquivo": nome_arquivo,
-            "caminho": caminho_arquivo,
+        # No Vercel serverless, não podemos salvar arquivos localmente
+        # Retornamos os dados processados para que possam ser salvos pelo cliente
+        # ou enviados via webhook
+        
+        resposta = {
+            "mensagem": "JSON recebido e processado com sucesso",
+            "arquivo_sugerido": nome_arquivo,
             "pacientes": num_pacientes,
-            "timestamp": timestamp
-        }), 200
+            "timestamp": timestamp,
+            "dados_processados": dados,
+            "nota": "No ambiente Vercel serverless, os dados são retornados. Use um webhook ou salve localmente."
+        }
+        
+        # Se houver webhook configurado, enviar dados (opcional)
+        if WEBHOOK_URL:
+            try:
+                import requests
+                requests.post(WEBHOOK_URL, json=dados, timeout=5)
+                resposta["webhook_enviado"] = True
+            except:
+                resposta["webhook_enviado"] = False
+        
+        return jsonify(resposta), 200
         
     except json.JSONDecodeError:
         return jsonify({
@@ -93,32 +118,23 @@ def receber_json():
         }), 500
 
 
-@app.route('/status', methods=['GET'])
+@app.route('/api/status', methods=['GET'])
 def status():
-    """Endpoint para verificar status da API e pasta jsons"""
-    try:
-        arquivos_json = [f for f in os.listdir(PASTA_JSONS) if f.endswith('.json')]
-        return jsonify({
-            "status": "online",
-            "pasta_jsons": PASTA_JSONS,
-            "pasta_existe": os.path.exists(PASTA_JSONS),
-            "arquivos_json": len(arquivos_json),
-            "ultimos_arquivos": arquivos_json[-5:] if len(arquivos_json) > 0 else []
-        }), 200
-    except Exception as e:
-        return jsonify({
-            "erro": f"Erro ao verificar status: {str(e)}"
-        }), 500
+    """Endpoint para verificar status da API"""
+    return jsonify({
+        "status": "online",
+        "plataforma": "Vercel Serverless",
+        "ambiente": os.environ.get("VERCEL_ENV", "production"),
+        "nota": "Funções serverless não mantêm estado. Arquivos não podem ser salvos localmente."
+    }), 200
 
 
 if __name__ == '__main__':
     print("=" * 50)
     print("API PET Saúde Digital")
     print("=" * 50)
-    print(f"Pasta de destino: {PASTA_JSONS}")
-    print(f"Endpoint: http://localhost:5000/receber-json")
-    print(f"Status: http://localhost:5000/status")
+    print(f"Endpoint: http://localhost:5000/api/receber-json")
+    print(f"Status: http://localhost:5000/api/status")
     print("=" * 50)
     print("Servidor iniciando...")
     app.run(host='0.0.0.0', port=5000, debug=True)
-

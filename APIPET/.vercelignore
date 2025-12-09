@@ -1,0 +1,15 @@
+# Arquivos a ignorar no deploy do Vercel
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+*.log
+.DS_Store
+exemplo_requisicao.py
+README.md
+DEPLOY_VERCEL.md
+
