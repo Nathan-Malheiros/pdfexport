@@ -64,6 +64,16 @@ def preencher_faltantes_dict(paciente):
     
     paciente_completo = campos_padrao.copy()
     paciente_completo.update(paciente)
+    
+    # Garantir que todos os valores são strings e tratar None/vazios
+    for key, value in paciente_completo.items():
+        if value is None:
+            paciente_completo[key] = " Campo não preenchido"
+        elif not isinstance(value, str):
+            paciente_completo[key] = str(value) if value else " Campo não preenchido"
+        elif value.strip() == "":
+            paciente_completo[key] = " Campo não preenchido"
+    
     return paciente_completo
 
 
@@ -84,7 +94,7 @@ def gerar_pdf_formulario_memoria(paciente):
     story = []
     
     # Adicionar logo se disponível
-    if LOGO_PATH and os.path.exists(LOGO_PATH):
+    if LOGO_PATH and isinstance(LOGO_PATH, str) and os.path.exists(LOGO_PATH):
         try:
             img = Image(LOGO_PATH)
             img.drawHeight = 80
@@ -92,9 +102,10 @@ def gerar_pdf_formulario_memoria(paciente):
             img.hAlign = "CENTER"
             story.append(img)
             story.append(Spacer(1, 12))
-        except:
-            pass
-    elif LOGO_BASE64:
+        except Exception as e:
+            # Logo não pôde ser carregado, continuar sem logo
+            print(f"Aviso: Não foi possível carregar logo de {LOGO_PATH}: {e}")
+    elif LOGO_BASE64 and isinstance(LOGO_BASE64, str):
         try:
             # Decodificar logo base64
             logo_data = base64.b64decode(LOGO_BASE64)
@@ -105,8 +116,9 @@ def gerar_pdf_formulario_memoria(paciente):
             img.hAlign = "CENTER"
             story.append(img)
             story.append(Spacer(1, 12))
-        except:
-            pass
+        except Exception as e:
+            # Logo base64 não pôde ser decodificado, continuar sem logo
+            print(f"Aviso: Não foi possível decodificar logo base64: {e}")
     
     # Título principal
     titulo_principal = Paragraph(
@@ -121,9 +133,11 @@ def gerar_pdf_formulario_memoria(paciente):
     )
     story.append(titulo_principal)
     
-    # Nome e CPF
-    story.append(Paragraph(f"<b>Nome:</b> {paciente['nome']}", styles["Normal"]))
-    story.append(Paragraph(f"<b>CPF:</b> {paciente['cpf']}", styles["Normal"]))
+    # Nome e CPF (garantir que são strings)
+    nome = str(paciente.get('nome', 'Nome não informado'))
+    cpf = str(paciente.get('cpf', 'CPF não informado'))
+    story.append(Paragraph(f"<b>Nome:</b> {nome}", styles["Normal"]))
+    story.append(Paragraph(f"<b>CPF:</b> {cpf}", styles["Normal"]))
     story.append(Spacer(1, 12))
     
     # Estilos
@@ -156,58 +170,64 @@ def gerar_pdf_formulario_memoria(paciente):
             story.append(Paragraph(f"<b>{label}:</b> {valor}", campo_style))
         story.append(Spacer(1, 8))
     
-    # Blocos de informações
+    # Blocos de informações (garantir que todos os valores são strings)
+    def get_str_value(key, default=" Campo não preenchido"):
+        value = paciente.get(key, default)
+        if value is None:
+            return default
+        return str(value) if value else default
+    
     bloco("Identificação Básica", {
-        "Sexo": paciente.get("sexo", " Campo não preenchido"),
-        "Faixa Etária": paciente.get("faixa_etaria", " Campo não preenchido"),
-        "Tipo de Usuário": paciente.get("tipo_usuario", " Campo não preenchido"),
-        "Data de Registro": paciente.get("data_registro", " Campo não preenchido")
+        "Sexo": get_str_value("sexo"),
+        "Faixa Etária": get_str_value("faixa_etaria"),
+        "Tipo de Usuário": get_str_value("tipo_usuario"),
+        "Data de Registro": get_str_value("data_registro")
     })
     
     bloco("Dados Clínicos Gerais", {
-        "Data Início Sintomas": paciente.get("data_inicio_sintomas", " Campo não preenchido"),
-        "Data AVC": paciente.get("data_avc", " Campo não preenchido"),
-        "Tipo de AVC": paciente.get("tipo_avc", " Campo não preenchido"),
-        "Admissão Janela Terapêutica": paciente.get("admissao_janela_terapeutica", " Campo não preenchido"),
-        "Trombolise": paciente.get("trombolise", " Campo não preenchido"),
-        "Trombectomia": paciente.get("trombectomia", " Campo não preenchido")
+        "Data Início Sintomas": get_str_value("data_inicio_sintomas"),
+        "Data AVC": get_str_value("data_avc"),
+        "Tipo de AVC": get_str_value("tipo_avc"),
+        "Admissão Janela Terapêutica": get_str_value("admissao_janela_terapeutica"),
+        "Trombolise": get_str_value("trombolise"),
+        "Trombectomia": get_str_value("trombectomia")
     })
     
     bloco("Medicamentos e Intervenções", {
-        "Medicamentos Utilizados": paciente.get("medicamentos_utilizados", " Campo não preenchido"),
-        "Ventilação Mecânica": paciente.get("ventilacao_mecanica", " Campo não preenchido"),
-        "Tempo de Ventilação": paciente.get("tempo_ventilacao", " Campo não preenchido"),
-        "Intubado": paciente.get("intubado", " Campo não preenchido"),
-        "Traqueostomizado": paciente.get("traqueostomizado", " Campo não preenchido")
+        "Medicamentos Utilizados": get_str_value("medicamentos_utilizados"),
+        "Ventilação Mecânica": get_str_value("ventilacao_mecanica"),
+        "Tempo de Ventilação": get_str_value("tempo_ventilacao"),
+        "Intubado": get_str_value("intubado"),
+        "Traqueostomizado": get_str_value("traqueostomizado")
     })
     
     bloco("Sequelas e Desfecho", {
-        "Sequelas": paciente.get("sequelas", " Campo não preenchido"),
-        "Desfecho": paciente.get("desfecho", " Campo não preenchido"),
-        "Alta com Medicamento": paciente.get("alta_medicamento", " Campo não preenchido"),
-        "Qual Medicamento": paciente.get("alta_medicamento_qual", " Campo não preenchido")
+        "Sequelas": get_str_value("sequelas"),
+        "Desfecho": get_str_value("desfecho"),
+        "Alta com Medicamento": get_str_value("alta_medicamento"),
+        "Qual Medicamento": get_str_value("alta_medicamento_qual")
     })
     
     bloco("Parente / Acompanhante", {
-        "Grau de Parentesco": paciente.get("grau_parentesco", " Campo não preenchido"),
-        "Cuidador Externo": paciente.get("cuidador_externo", " Campo não preenchido"),
-        "Tempo Chegada ao Hospital": paciente.get("tempo_chegada_hospital", " Campo não preenchido")
+        "Grau de Parentesco": get_str_value("grau_parentesco"),
+        "Cuidador Externo": get_str_value("cuidador_externo"),
+        "Tempo Chegada ao Hospital": get_str_value("tempo_chegada_hospital")
     })
     
     bloco("Fatores de Risco e Comorbidades", {
-        "Comorbidades": paciente.get("comorbidades", " Campo não preenchido"),
-        "Histórico Familiar": paciente.get("historico_familiar", " Campo não preenchido"),
-        "Medicamento de Uso Diário": paciente.get("medicamento_uso_diario", " Campo não preenchido"),
-        "Qual Medicamento": paciente.get("medicamento_uso_diario_qual", " Campo não preenchido")
+        "Comorbidades": get_str_value("comorbidades"),
+        "Histórico Familiar": get_str_value("historico_familiar"),
+        "Medicamento de Uso Diário": get_str_value("medicamento_uso_diario"),
+        "Qual Medicamento": get_str_value("medicamento_uso_diario_qual")
     })
     
     bloco("Hábitos Alimentares e Estilo de Vida", {
-        "Alimentação": paciente.get("alimentacao", " Campo não preenchido"),
-        "Atividade Física": paciente.get("atividade_fisica", " Campo não preenchido"),
-        "Tabagismo": paciente.get("tabagismo", " Campo não preenchido"),
-        "Álcool": paciente.get("alcool", " Campo não preenchido"),
-        "Uso de Medicamentos (Acompanhante)": paciente.get("uso_medicamentos", " Campo não preenchido"),
-        "Quais Medicamentos": paciente.get("uso_medicamentos_qual", " Campo não preenchido")
+        "Alimentação": get_str_value("alimentacao"),
+        "Atividade Física": get_str_value("atividade_fisica"),
+        "Tabagismo": get_str_value("tabagismo"),
+        "Álcool": get_str_value("alcool"),
+        "Uso de Medicamentos (Acompanhante)": get_str_value("uso_medicamentos"),
+        "Quais Medicamentos": get_str_value("uso_medicamentos_qual")
     })
     
     # Rodapé
@@ -305,17 +325,22 @@ def receber_json():
                 # Gerar PDF em memória
                 pdf_bytes = gerar_pdf_formulario_memoria(paciente)
                 
-                # Nome do arquivo
-                nome_pdf = f"{paciente['nome'].replace(' ', '_')}_{paciente['cpf'].replace('.', '').replace('-', '')}.pdf"
+                # Nome do arquivo (sanitizar para evitar caracteres inválidos)
+                nome_paciente = str(paciente.get('nome', 'Paciente')).replace(' ', '_').replace('/', '_').replace('\\', '_')
+                cpf_paciente = str(paciente.get('cpf', '00000000000')).replace('.', '').replace('-', '').replace(' ', '')
+                nome_pdf = f"{nome_paciente}_{cpf_paciente}.pdf"
                 
                 pdfs_gerados.append({
                     "nome": nome_pdf,
                     "bytes": pdf_bytes,
-                    "paciente": paciente['nome']
+                    "paciente": str(paciente.get('nome', 'Paciente'))
                 })
             except Exception as e:
+                import traceback
+                error_details = traceback.format_exc()
                 return jsonify({
-                    "erro": f"Erro ao gerar PDF para {paciente.get('nome', 'paciente desconhecido')}: {str(e)}"
+                    "erro": f"Erro ao gerar PDF para {paciente.get('nome', 'paciente desconhecido')}: {str(e)}",
+                    "detalhes": error_details if os.environ.get("DEBUG", "False") == "True" else None
                 }), 500
         
         # Se houver apenas um PDF, retornar diretamente
@@ -349,13 +374,16 @@ def receber_json():
             }
         )
         
-    except json.JSONDecodeError:
+    except json.JSONDecodeError as e:
         return jsonify({
-            "erro": "JSON inválido"
+            "erro": f"JSON inválido: {str(e)}"
         }), 400
     except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
         return jsonify({
-            "erro": f"Erro ao processar requisição: {str(e)}"
+            "erro": f"Erro ao processar requisição: {str(e)}",
+            "detalhes": error_details if os.environ.get("DEBUG", "False") == "True" else None
         }), 500
 
 
