@@ -5,7 +5,7 @@ Script para converter o logo para base64
 
 import base64
 import os
-
+##
 # Caminho do logo (ajuste se necessário)
 logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "art", "logoPET.png")
 
