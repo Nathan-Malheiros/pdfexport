@@ -184,7 +184,11 @@ def handler(req):
     """Handler principal da API serverless para Vercel"""
     try:
         # Verificar método HTTP
-        method = req.method if hasattr(req, 'method') else req.get('httpMethod', 'GET')
+        # Vercel passa um objeto Request, mas pode vir como dict também
+        if isinstance(req, dict):
+            method = req.get('httpMethod', req.get('method', 'GET'))
+        else:
+            method = req.method if hasattr(req, 'method') else getattr(req, 'httpMethod', 'GET')
         
         if method == 'OPTIONS':
             return {
