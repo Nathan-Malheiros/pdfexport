@@ -62,7 +62,7 @@ def receber_json():
             return jsonify({
                 "erro": "JSON deve ser um objeto ou array"
             }), 400
-        
+        #h
         # Garantir que é um array (formato esperado pelo pdfexportv3.py)
         if isinstance(dados, dict):
             dados = [dados]
