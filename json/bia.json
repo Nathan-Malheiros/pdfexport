@@ -1,0 +1,44 @@
+[
+  {
+    "nome": "Ana Beatriz Ferreira",
+    "cpf": "555.666.777-88",
+    "sexo": "Feminino",
+    "faixa_etaria": "70-79 anos",
+    "tipo_usuario": "Paciente",
+    "data_registro": "2025-11-08",
+
+    "data_inicio_sintomas": "2025-10-05",
+    "data_avc": "2025-10-05",
+    "tipo_avc": "Isquêmico",
+    "admissao_janela_terapeutica": "Não",
+    "trombolise": "Não",
+    "trombectomia": "Sim",
+
+    "medicamentos_utilizados": "Clopidogrel",
+    "ventilacao_mecanica": "Não",
+    "tempo_ventilacao": "",
+    "intubado": "Não",
+    "traqueostomizado": "Não",
+
+    "sequelas": "Sem sequelas aparentes",
+    "desfecho": "Alta com acompanhamento domiciliar",
+    "alta_medicamento": "Sim",
+    "alta_medicamento_qual": "Clopidogrel 75mg",
+
+    "grau_parentesco": "Filho",
+    "cuidador_externo": "Sim",
+    "tempo_chegada_hospital": "4 horas",
+
+    "comorbidades": "Hipertensão, Diabetes, Obesidade",
+    "historico_familiar": "AVC na mãe",
+    "medicamento_uso_diario": "Sim",
+    "medicamento_uso_diario_qual": "Losartana, Metformina",
+
+    "alimentacao": "Rica em carboidratos",
+    "atividade_fisica": "Sedentária",
+    "tabagismo": "Não",
+    "alcool": "Não",
+    "uso_medicamentos": "Não",
+    "uso_medicamentos_qual": ""
+  }
+]

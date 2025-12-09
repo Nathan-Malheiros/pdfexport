@@ -1,0 +1,44 @@
+[
+  {
+    "nome": "João Pedro Moura",
+    "cpf": "987.654.321-00",
+    "sexo": "Masculino",
+    "faixa_etaria": "50-59 anos",
+    "tipo_usuario": "Paciente",
+    "data_registro": "2025-11-08",
+
+    "data_inicio_sintomas": "2025-10-10",
+    "data_avc": "2025-10-11",
+    "tipo_avc": "Hemorrágico",
+    "admissao_janela_terapeutica": "Não",
+    "trombolise": "Não",
+    "trombectomia": "Não",
+
+    "medicamentos_utilizados": "Captopril, Sinvastatina",
+    "ventilacao_mecanica": "Sim",
+    "tempo_ventilacao": "2 dias",
+    "intubado": "Sim",
+    "traqueostomizado": "Não",
+
+    "sequelas": "Dificuldade de fala",
+    "desfecho": "Alta hospitalar",
+    "alta_medicamento": "Sim",
+    "alta_medicamento_qual": "Captopril 25mg, Sinvastatina 40mg",
+
+    "grau_parentesco": "Esposa",
+    "cuidador_externo": "Sim",
+    "tempo_chegada_hospital": "3 horas",
+
+    "comorbidades": "Hipertensão",
+    "historico_familiar": "Nenhum",
+    "medicamento_uso_diario": "Sim",
+    "medicamento_uso_diario_qual": "Captopril",
+
+    "alimentacao": "Rica em sal",
+    "atividade_fisica": "Raramente",
+    "tabagismo": "Sim",
+    "alcool": "Sim",
+    "uso_medicamentos": "Não",
+    "uso_medicamentos_qual": ""
+  }
+]

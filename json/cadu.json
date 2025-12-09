@@ -1,0 +1,44 @@
+[
+  {
+    "nome": "Carlos Eduardo Santos",
+    "cpf": "111.222.333-44",
+    "sexo": "Masculino",
+    "faixa_etaria": "",
+    "tipo_usuario": "Paciente",
+    "data_registro": "2025-11-08",
+
+    "data_inicio_sintomas": "",
+    "data_avc": "",
+    "tipo_avc": "Isquêmico",
+    "admissao_janela_terapeutica": "",
+    "trombolise": "",
+    "trombectomia": "",
+
+    "medicamentos_utilizados": "",
+    "ventilacao_mecanica": "",
+    "tempo_ventilacao": "",
+    "intubado": "",
+    "traqueostomizado": "",
+
+    "sequelas": "",
+    "desfecho": "",
+    "alta_medicamento": "",
+    "alta_medicamento_qual": "",
+
+    "grau_parentesco": "",
+    "cuidador_externo": "",
+    "tempo_chegada_hospital": "",
+
+    "comorbidades": "",
+    "historico_familiar": "",
+    "medicamento_uso_diario": "",
+    "medicamento_uso_diario_qual": "",
+
+    "alimentacao": "",
+    "atividade_fisica": "",
+    "tabagismo": "",
+    "alcool": "",
+    "uso_medicamentos": "",
+    "uso_medicamentos_qual": ""
+  }
+]
