@@ -23,7 +23,7 @@ def home():
         "metodo": "POST",
         "plataforma": "Vercel"
     }), 200
-
+#ola
 
 @app.route('/api/receber-json', methods=['POST', 'OPTIONS'])
 def receber_json():
